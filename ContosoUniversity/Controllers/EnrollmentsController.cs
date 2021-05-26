@@ -21,15 +21,15 @@ namespace ContosoUniversity.Controllers
 
         // GET: Enrollments
         public async Task<IActionResult> Index(
-        string sortOrder,
-        string currentFilter,
-        string searchString,
-        int? pageNumber)
+            string sortOrder,
+            string currentFilter,
+            string searchString,
+            int? pageNumber)
         {
             ViewData["CurrentSort"] = sortOrder;
             ViewData["GradeSortParm"] = String.IsNullOrEmpty(sortOrder) ? "grade_desc" : "";
-            ViewData["CourseIDSortParm"] = sortOrder == "CourseID" ? "courseID_desc" : "CourseID";
-            ViewData["StudentIDSortParm"] = sortOrder == "StudentID" ? "studentID_desc" : "StudentID";
+            ViewData["CourseSortParm"] = sortOrder == "Course" ? "course_desc" : "Course";
+            ViewData["StudentSortParm"] = String.IsNullOrEmpty(sortOrder) ? "student_desc" : "";
 
             if (searchString != null)
             {
@@ -42,41 +42,36 @@ namespace ContosoUniversity.Controllers
 
             ViewData["CurrentFilter"] = searchString;
 
-            //var schoolContext = _context.Enrollments.Include(e => e.CourseID).Include(e => e.StudentID);
-            //return View(await schoolContext.ToListAsync());
-
-            var enrollments = from e in _context.Enrollments
-                          select e;
+            var enrollments = from s in _context.Enrollments.Include(c => c.Course).Include(s => s.Student)
+                              select s;
             if (!String.IsNullOrEmpty(searchString))
             {
-                enrollments = enrollments.Where(e => e.CourseID.ToString().Contains(searchString)
-                                      || e.StudentID.ToString().Contains(searchString));
-          }
+                enrollments = enrollments.Where(s => s.Course.Title.Contains(searchString)
+                 || s.Student.LastName.Contains(searchString)
+                 || s.Student.FirstMidName.Contains(searchString));
+            }
             switch (sortOrder)
             {
                 case "grade_desc":
                     enrollments = enrollments.OrderByDescending(e => e.Grade);
                     break;
-                case "CourseID":
-                    enrollments = enrollments.OrderBy(e => e.CourseID);
+                case "Course":
+                    enrollments = enrollments.OrderBy(c => c.Course);
                     break;
-                case "courseID_desc":
-                    enrollments = enrollments.OrderByDescending(e => e.CourseID);
+                case "course_desc":
+                    enrollments = enrollments.OrderByDescending(c => c.Course);
                     break;
-                case "StudentID":
-                    enrollments = enrollments.OrderBy(e => e.StudentID);
-                    break;
-                case "studentID_desc":
-                    enrollments = enrollments.OrderByDescending(e => e.StudentID);
+                case "student_desc":
+                    enrollments = enrollments.OrderBy(s => s.Student);
                     break;
                 default:
                     enrollments = enrollments.OrderBy(e => e.Grade);
                     break;
             }
-
             int pageSize = 5;
             return View(await PaginatedList<Enrollment>.CreateAsync(enrollments.AsNoTracking(), pageNumber ?? 1, pageSize));
         }
+
 
         // GET: Enrollments/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -101,8 +96,8 @@ namespace ContosoUniversity.Controllers
         // GET: Enrollments/Create
         public IActionResult Create()
         {
-            ViewData["CourseID"] = new SelectList(_context.Courses, "CourseID", "CourseID");
-            ViewData["StudentID"] = new SelectList(_context.Students, "ID", "ID");
+            ViewData["CourseID"] = new SelectList(_context.Courses, "CourseID", "Title");
+            ViewData["StudentID"] = new SelectList(_context.Students, "ID", "LastName");
             return View();
         }
 
@@ -121,15 +116,15 @@ namespace ContosoUniversity.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CourseID"] = new SelectList(_context.Courses, "CourseID", "CourseID", enrollment.CourseID);
-            ViewData["StudentID"] = new SelectList(_context.Students, "ID", "ID", enrollment.StudentID);
+            ViewData["CourseID"] = new SelectList(_context.Courses, "CourseID", "Title", enrollment.CourseID);
+            ViewData["StudentID"] = new SelectList(_context.Students, "ID", "LastName", enrollment.StudentID);
             }
             catch (DbUpdateException /* ex */)
             {
                 //Log the error (uncomment ex variable name and write a log.
-                ModelState.AddModelError("", "Unable to save changes. " +
-                    "Try again, and if the problem persists " +
-                    "see your system administrator.");
+                ModelState.AddModelError("", "Невозможно сохранить изменения. " +
+                    "Попробуйте еще раз, и если проблема не исчезнет " +
+                    "свяжитесь с системным администратором.");
             }
             return View(enrollment);
         }
@@ -147,8 +142,8 @@ namespace ContosoUniversity.Controllers
             {
                 return NotFound();
             }
-            ViewData["CourseID"] = new SelectList(_context.Courses, "CourseID", "CourseID", enrollment.CourseID);
-            ViewData["StudentID"] = new SelectList(_context.Students, "ID", "ID", enrollment.StudentID);
+            ViewData["CourseID"] = new SelectList(_context.Courses, "CourseID", "Title", enrollment.CourseID);
+            ViewData["StudentID"] = new SelectList(_context.Students, "ID", "LastName", enrollment.StudentID);
             return View(enrollment);
         }
 
@@ -179,9 +174,9 @@ namespace ContosoUniversity.Controllers
                 catch (DbUpdateException /* ex */)
                 {
                     //Log the error (uncomment ex variable name and write a log.)
-                    ModelState.AddModelError("", "Unable to save changes. " +
-                        "Try again, and if the problem persists, " +
-                        "see your system administrator.");
+                    ModelState.AddModelError("", "Невозможно сохранить изменения. " +
+                    "Попробуйте еще раз, и если проблема не исчезнет " +
+                    "свяжитесь с системным администратором.");
                 }
             }
             return View(enrollmentToUpdate);
@@ -208,8 +203,9 @@ namespace ContosoUniversity.Controllers
             if (saveChangesError.GetValueOrDefault())
             {
                 ViewData["ErrorMessage"] =
-                    "Delete failed. Try again, and if the problem persists " +
-                    "see your system administrator.";
+                    "Удаление не удалось." +
+                    "Попробуйте еще раз, и если проблема не исчезнет " +
+                    "свяжитесь с системным администратором.";
             }
 
             return View(enrollment);

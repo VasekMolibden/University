@@ -1,12 +1,12 @@
 ﻿@model ContosoUniversity.Models.Enrollment
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Удалить";
 }
 
-<h1>Delete</h1>
+<h1>Удалить</h1>
 <p class="text-danger">@ViewData["ErrorMessage"]</p>
-<h3>Are you sure you want to delete this?</h3>
+<h3>Вы уверены, что хотите удалить эту запись?</h3>
 <div>
     <h4>Enrollment</h4>
     <hr />
@@ -33,7 +33,7 @@
     
     <form asp-action="Delete">
         <input type="hidden" asp-for="EnrollmentID" />
-        <input type="submit" value="Delete" class="btn btn-danger" /> |
-        <a asp-action="Index">Back to List</a>
+        <input type="submit" value="Удалить" class="btn btn-danger" /> |
+        <a asp-action="Index">Вернуться к списку</a>
     </form>
 </div>

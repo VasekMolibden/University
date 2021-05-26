@@ -111,9 +111,9 @@ namespace ContosoUniversity.Controllers
             catch (DbUpdateException /* ex */)
             {
                 //Log the error (uncomment ex variable name and write a log.
-                ModelState.AddModelError("", "Unable to save changes. " +
-                    "Try again, and if the problem persists " +
-                    "see your system administrator.");
+                ModelState.AddModelError("", "Невозможно сохранить изменения. " +
+                    "Попробуйте еще раз, и если проблема не исчезнет " +
+                    "свяжитесь с системным администратором.");
             }
             return View(course);
         }
@@ -159,9 +159,9 @@ namespace ContosoUniversity.Controllers
                 catch (DbUpdateException /* ex */)
                 {
                     //Log the error (uncomment ex variable name and write a log.)
-                    ModelState.AddModelError("", "Unable to save changes. " +
-                        "Try again, and if the problem persists, " +
-                        "see your system administrator.");
+                    ModelState.AddModelError("", "Невозможно сохранить изменения. " +
+                    "Попробуйте еще раз, и если проблема не исчезнет " +
+                    "свяжитесь с системным администратором.");
                 }
             }
             return View(courseToUpdate);
@@ -186,8 +186,9 @@ namespace ContosoUniversity.Controllers
             if (saveChangesError.GetValueOrDefault())
             {
                 ViewData["ErrorMessage"] =
-                    "Delete failed. Try again, and if the problem persists " +
-                    "see your system administrator.";
+                    "Удаление не удалось." +
+                    "Попробуйте еще раз, и если проблема не исчезнет " +
+                    "свяжитесь с системным администратором.";
             }
 
             return View(course);
